@@ -46,10 +46,11 @@ public class CopierView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (thread == null || !thread.isAlive()) {
+        if (event.getActionMasked() != MotionEvent.ACTION_DOWN) 
+            return true;
+        if (thread == null || !thread.isRunning()) {
             thread = new CopierThread(getHolder(), getContext(), null);
             thread.start();
-            Logger.getLogger(CopierView.class.getName()).log(Level.INFO, "thread started");
         }
         return true;
     }
@@ -66,7 +67,7 @@ public class CopierView extends SurfaceView implements SurfaceHolder.Callback {
             this.holder = holder;
             this.context = context;
             this.handler = handler;
-            this.running = false;
+            this.running = true;
             this.starttime = System.currentTimeMillis();
         }
 
@@ -74,6 +75,10 @@ public class CopierView extends SurfaceView implements SurfaceHolder.Callback {
             this.running = running;
         }
 
+        public boolean isRunning() {
+            return running;
+        }
+        
         @Override
         public void run() {
             while (running) {
@@ -88,12 +93,11 @@ public class CopierView extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
         }
-        int count = 0;
 
         public void draw(Canvas c) {
             long ms = System.currentTimeMillis() - starttime;
             final long forwardDuration = 2000; // ms
-            final long backwardDuration = 1000; // ms
+            final long backwardDuration = 500; // ms
             int w = c.getWidth();
             int h = c.getHeight();
             int p = 0;
@@ -110,7 +114,6 @@ public class CopierView extends SurfaceView implements SurfaceHolder.Callback {
             c.drawColor(Color.BLACK);
             paint.setColor(Color.WHITE);
             c.drawRect(0, p - 2, w, p + 2, paint);
-            c.drawText(String.valueOf(count++), w / 2, h / 2, paint);
         }
     }
 }
